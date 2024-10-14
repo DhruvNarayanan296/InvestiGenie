@@ -8,6 +8,8 @@ from prophet.plot import plot_plotly
 from plotly import graph_objs as go
 import requests  # Import requests to fetch news data
 import matplotlib.pyplot as plt
+import streamlit.components.v1 as components
+
 st.set_page_config(page_title="InvestiGenie!", page_icon=":chart:")
 hide_st_style = """
             <style>
@@ -20,36 +22,13 @@ from bs4 import BeautifulSoup
 import logging
 import shutil
 st.markdown(hide_st_style, unsafe_allow_html=True)
-def inject_ga():
-    # new tag method
-    GA_ID = "G-PN087XGHGZ"
 
-    GA_JS = """
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-PN087XGHGZ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+# Include Google Analytics tracking code
+with open("google_analytics.html", "r") as f:
+    html_code = f.read()
+    components.html(html_code, height=0)
 
-  gtag('config', 'G-PN087XGHGZ');
-</script>
-"""
-    # Insert the script in the head tag of the static template inside your virtual
-    index_path = pathlib.Path(st.__file__).parent / "static" / "index.html"
-    logging.info(f'editing {index_path}')
-    soup = BeautifulSoup(index_path.read_text(), features="lxml")
-    if not soup.find(id=GA_ID):  # if cannot find tag
-        bck_index = index_path.with_suffix('.bck')
-        if bck_index.exists():
-            shutil.copy(bck_index, index_path)  # recover from backup
-        else:
-            shutil.copy(index_path, bck_index)  # keep a backup
-        html = str(soup)
-        new_html = html.replace('<head>', '<head>\n' + GA_JS)
-        index_path.write_text(new_html)
-
-# Constants
+#Constants
 START = "2015-01-01"
 TODAY = date.today()  # Changed to date object
 MAX_DATE = TODAY + pd.DateOffset(years=4)  # 4 years from today
